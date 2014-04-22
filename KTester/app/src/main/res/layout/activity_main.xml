@@ -1,0 +1,244 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.kloudlessapi.ktester.app.MainActivity">
+
+    <Button
+        android:id="@+id/auth_button"
+        android:text="Link with Kloudless"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="List"
+        android:id="@+id/accounts_list"
+        android:onClick="listAccounts"
+        android:layout_below="@+id/textView2"
+        android:layout_toLeftOf="@+id/files_update" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Info"
+        android:id="@+id/accounts_info"
+        android:onClick="getAccountInfo"
+        android:layout_below="@+id/textView2"
+        android:layout_toRightOf="@+id/folders_info" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:id="@+id/accounts_delete"
+        android:onClick="deleteAccount"
+        android:layout_alignTop="@+id/accounts_info"
+        android:layout_toRightOf="@+id/accounts_info" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Info"
+        android:id="@+id/folders_info"
+        android:onClick="getFolderInfo"
+        android:layout_below="@+id/textView"
+        android:layout_alignLeft="@+id/accounts_list"
+        android:layout_alignStart="@+id/accounts_list" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update"
+        android:id="@+id/folders_update"
+        android:onClick="updateFolder"
+        android:layout_below="@+id/textView"
+        android:layout_toRightOf="@+id/folders_info" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create"
+        android:id="@+id/folders_create"
+        android:layout_alignTop="@+id/folders_update"
+        android:layout_toRightOf="@+id/folders_update"
+        android:onClick="createFolder" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:id="@+id/folders_delete"
+        android:onClick="deleteFolder"
+        android:layout_below="@+id/folders_info"
+        android:layout_alignLeft="@+id/folders_info"
+        android:layout_alignStart="@+id/folders_info" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Contents"
+        android:id="@+id/folders_contents"
+        android:layout_alignTop="@+id/folders_create"
+        android:layout_toRightOf="@+id/folders_create"
+        android:onClick="getFolderContents" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Info"
+        android:id="@+id/files_info"
+        android:onClick="getFileInfo"
+        android:layout_below="@+id/folders_info"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="75dp" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update"
+        android:id="@+id/files_update"
+        android:layout_alignTop="@+id/files_info"
+        android:layout_toRightOf="@+id/files_info"
+        android:onClick="updateFile" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Upload"
+        android:id="@+id/files_upload"
+        android:layout_alignTop="@+id/files_download"
+        android:layout_toRightOf="@+id/files_update"
+        android:onClick="uploadFile" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:id="@+id/files_delete"
+        android:onClick="deleteFile"
+        android:layout_below="@+id/files_info"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Download"
+        android:id="@+id/files_download"
+        android:layout_alignTop="@+id/files_update"
+        android:layout_toRightOf="@+id/files_upload"
+        android:onClick="downloadFile" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="List"
+        android:id="@+id/links_list"
+        android:onClick="listLinks"
+        android:layout_below="@+id/textView4"
+        android:layout_toLeftOf="@+id/files_update" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Info"
+        android:id="@+id/button15"
+        android:onClick="getLinkInfo"
+        android:layout_below="@+id/textView4"
+        android:layout_toRightOf="@+id/folders_info" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create"
+        android:id="@+id/button16"
+        android:onClick="createLink"
+        android:layout_alignTop="@+id/button17"
+        android:layout_toRightOf="@+id/links_update" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:id="@+id/button17"
+        android:onClick="deleteLink"
+        android:layout_alignTop="@+id/button15"
+        android:layout_toRightOf="@+id/button16" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update"
+        android:id="@+id/links_update"
+        android:onClick="updateLink"
+        android:layout_alignTop="@+id/button16"
+        android:layout_alignLeft="@+id/accounts_delete"
+        android:layout_alignStart="@+id/accounts_delete" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Accounts"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/auth_button"
+        android:layout_toLeftOf="@+id/accounts_delete" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Folders"
+        android:id="@+id/textView"
+        android:layout_below="@+id/accounts_list"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignStart="@+id/textView2" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Files"
+        android:id="@+id/textView3"
+        android:layout_above="@+id/files_update"
+        android:layout_alignLeft="@+id/textView4"
+        android:layout_alignStart="@+id/textView4" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Links"
+        android:id="@+id/textView4"
+        android:layout_below="@+id/files_info"
+        android:layout_alignLeft="@+id/textView"
+        android:layout_alignStart="@+id/textView"
+        android:layout_marginTop="54dp" />
+
+</RelativeLayout>

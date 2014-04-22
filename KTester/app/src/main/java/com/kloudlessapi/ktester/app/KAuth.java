@@ -1,0 +1,118 @@
+package com.kloudlessapi.ktester.app;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+
+import java.util.HashMap;
+
+/**
+ * Created by timothytliu on 4/17/14.
+ */
+public class KAuth {
+
+    final static String kSDKVersion = "0.0.1"; // TODO: parameterize from build system
+    final String kAPIHost = "api.kloudless.com";
+    final String kWebHost = "www.kloudless.com";
+    final String kAPIVersion = "0";
+    final String kProtocolHTTPS = "https";
+
+    static String appId = null;
+    static HashMap<String, Object> keysStore = null;
+    static KAuth sharedAuth = null;
+
+    /**
+     * Creates a new KAuth with the given AppId
+     * @return
+     */
+    public KAuth(String appId) {
+        this.appId = appId;
+        this.keysStore = new HashMap<String, Object>();
+    }
+
+    public static KAuth getSharedAuth() {
+        return sharedAuth;
+    }
+
+    public static void setSharedAuth(KAuth auth) {
+        if (auth.equals(sharedAuth)) return;
+        sharedAuth = auth;
+    }
+
+    public void startAuthentication(Context context) {
+
+        // TODO: add check
+        String url = String.format("%s://%s/services/?app_id=%s&referrer=mobile&retrieve_account_key=true",
+                kProtocolHTTPS, kAPIHost, appId);
+
+        // Start Kloudless auth activity.
+        Intent intent = new Intent(context, AuthActivity.class);
+        intent.putExtra(AuthActivity.URL, url);
+        if (!(context instanceof Activity)) {
+            // If starting the intent outside of an Activity, must include
+            // this. See startActivity(). Otherwise, we prefer to stay in
+            // the same task.
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        context.startActivity(intent);
+    }
+
+    /**
+     * Returns whether the user successfully authenticated with Kloudless.
+     * Reasons for failure include the user canceling authentication, network
+     * errors, and improper setup from within your app.
+     */
+    public boolean authenticationSuccessful() {
+        Intent data = AuthActivity.result;
+
+        if (data == null) {
+            return false;
+        }
+
+        String account = data.getStringExtra(AuthActivity.ACCOUNT);
+        String accountKey = data.getStringExtra(AuthActivity.ACCOUNT_KEY);
+
+        if (account != null && !account.equals("") &&
+                accountKey != null && !accountKey.equals("")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Adds a user's account and Account Key when you return
+     * to your activity from the Kloudless authentication process. Should be
+     * called from your activity's {@code onResume()} method, but only
+     * after checking that {@link #authenticationSuccessful()} is {@code true}.
+     *
+     * @return the authenticated user's Account ID.
+     *
+     * @throws IllegalStateException if authentication was not successful prior
+     *         to this call (check with {@link #authenticationSuccessful()}.
+     */
+    public String finishAuthentication() throws IllegalStateException {
+        Intent data = AuthActivity.result;
+
+        if (data == null) {
+            throw new IllegalStateException();
+        }
+
+        String account = data.getStringExtra(AuthActivity.ACCOUNT);
+        if (account == null || account.length() == 0) {
+            throw new IllegalArgumentException("Invalid result intent passed in. " +
+                    "Missing account.");
+        }
+
+        String accountKey = data.getStringExtra(AuthActivity.ACCOUNT_KEY);
+        if (accountKey == null || accountKey.length() == 0) {
+            throw new IllegalArgumentException("Invalid result intent passed in. " +
+                    "Missing accountKey.");
+        }
+
+        keysStore.put(account, accountKey);
+
+        return account;
+    }
+
+}
