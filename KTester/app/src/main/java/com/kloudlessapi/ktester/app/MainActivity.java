@@ -38,6 +38,10 @@ public class MainActivity extends ActionBarActivity {
     static Gson GSON = new GsonBuilder().create();
 
     private boolean mLoggedIn;
+    // If you want to test, please use your own folder and file ids.
+    public String folderId = "fL2E=";
+    public String fileId = "fL3N1cHBvcnQtc2FsZXNmb3JjZS5wbmc=";
+    public String linkId = "iywSjUZMos2_M_HTHpJU";
 
     // Android widgets
     private Button mSubmit;
@@ -47,7 +51,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String appId = "BNXDcY40U_THkU18dAxcNyutPOyTqneNB23WdAaw8k53ovpt";
+        String appId = "INSERT YOUR APP ID HERE";
         KAuth auth = new KAuth(appId);
         KAuth.setSharedAuth(auth);
 
@@ -159,8 +163,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "You have " + accounts.count.toString() + " accounts connected.",
-                        Toast.LENGTH_LONG).show();
+                if (accounts != null) {
+                    Toast.makeText(context, "You have " + accounts.count.toString() + " accounts connected.",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -180,7 +186,7 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
-                    account = Account.retrieve("4", null);
+                    account = Account.retrieve(Kloudless.accountId, null);
                     Log.i("getAccountInfo", account.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -190,8 +196,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your account info: " + account.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (account != null) {
+                    Toast.makeText(context, "Your account info: " + account.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -216,7 +224,7 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
-                    contents = Folder.contents("root", "4", null);
+                    contents = Folder.contents("root", Kloudless.accountId, null);
                     Log.i("getFolderContents", contents.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -226,8 +234,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Folder has " + contents.count.toString() + " objects.",
-                        Toast.LENGTH_LONG).show();
+                if (contents != null) {
+                    Toast.makeText(context, "Folder has " + contents.count.toString() + " objects.",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -247,7 +257,7 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
-                    folder = Folder.retrieve("fL2E=", "4", null);
+                    folder = Folder.retrieve(folderId, Kloudless.accountId, null);
                     Log.i("getFolderInfo", folder.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -257,8 +267,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your folder Info " + folder.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (folder != null) {
+                    Toast.makeText(context, "Your folder Info " + folder.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -280,7 +292,7 @@ public class MainActivity extends ActionBarActivity {
                 try {
                     HashMap<String, Object> params = new HashMap<String, Object>();
                     params.put("name", "a");
-                    folder = Folder.save("fL2E=", "4", params);
+                    folder = Folder.save(folderId, Kloudless.accountId, params);
                     Log.i("updateFolder", folder.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -290,8 +302,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your folder Info " + folder.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (folder != null) {
+                    Toast.makeText(context, "Your folder Info " + folder.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -314,7 +328,7 @@ public class MainActivity extends ActionBarActivity {
                     HashMap<String, Object> params = new HashMap<String, Object>();
                     params.put("name", "new new folder");
                     params.put("parent_id", "root");
-                    Folder folder = Folder.create("4", params);
+                    Folder folder = Folder.create(Kloudless.accountId, params);
                     Log.i("createFolder", folder.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -324,8 +338,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your folder Info " + folder.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (folder != null) {
+                    Toast.makeText(context, "Your folder Info " + folder.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -351,7 +367,7 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
-                    KloudlessResponse response = File.contents("fL3N1cHBvcnQtc2FsZXNmb3JjZS5wbmc\u003d", "4", null);
+                    KloudlessResponse response = File.contents(fileId, Kloudless.accountId, null);
                     contents = response.getResponseBody();
                     Log.i("downloadFile", contents);
                 } catch (KloudlessException e) {
@@ -362,8 +378,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your file contents: " + contents,
-                        Toast.LENGTH_LONG).show();
+                if (contents != null) {
+                    Toast.makeText(context, "Your file contents: " + contents,
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -383,7 +401,7 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
-                    file = File.retrieve("fL3Rlc3QgKDE2KS50eHQ\u003d", "4", null);
+                    file = File.retrieve(fileId, Kloudless.accountId, null);
                     Log.i("getFileInfo", file.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -393,8 +411,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your file Info " + file.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (file != null) {
+                    Toast.makeText(context, "Your file Info " + file.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -416,7 +436,7 @@ public class MainActivity extends ActionBarActivity {
                 try {
                     HashMap<String, Object> params = new HashMap<String, Object>();
                     params.put("name", "test (16).txt");
-                    File file = File.save("fL3Rlc3QgKDE2KS50eHQ\u003d", "4", params);
+                    File file = File.save(fileId, Kloudless.accountId, params);
                     Log.i("getFileInfo", file.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -426,8 +446,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your file Info " + file.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (file != null) {
+                    Toast.makeText(context, "Your file Info " + file.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -466,7 +488,7 @@ public class MainActivity extends ActionBarActivity {
 
                     System.out.println(params);
 
-                    File file = File.create("4", params);
+                    File file = File.create(Kloudless.accountId, params);
                     Log.i("getFileInfo", file.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -480,8 +502,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your file Info " + file.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (file != null) {
+                    Toast.makeText(context, "Your file Info " + file.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -506,7 +530,7 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
-                    links = Link.all("2", null);
+                    links = Link.all(Kloudless.accountId, null);
                     Log.i("listLinks", links.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -516,8 +540,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "You have " + links.count.toString() + " links.",
-                        Toast.LENGTH_LONG).show();
+                if (links != null) {
+                    Toast.makeText(context, "You have " + links.count.toString() + " links.",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -547,8 +573,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your link info " + link.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (link != null) {
+                    Toast.makeText(context, "Your link info " + link.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -570,7 +598,7 @@ public class MainActivity extends ActionBarActivity {
                 try {
                     HashMap<String, Object> params = new HashMap<String, Object>();
                     params.put("active", false);
-                    Link link = Link.save("iywSjUZMos2_M_HTHpJU", "2", params);
+                    Link link = Link.save(linkId, Kloudless.accountId, params);
                     Log.i("getLinkInfo", link.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -580,8 +608,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your link info " + link.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (link != null) {
+                    Toast.makeText(context, "Your link info " + link.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -602,8 +632,8 @@ public class MainActivity extends ActionBarActivity {
 
                 try {
                     HashMap<String, Object> params = new HashMap<String, Object>();
-                    params.put("file_id", "fL3Rlc3QtZHJvcGJveC5wbmc\u003d");
-                    Link link = Link.create("4", params);
+                    params.put("file_id", fileId);
+                    Link link = Link.create(Kloudless.accountId, params);
                     Log.i("getLinkInfo", link.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -613,8 +643,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Object o) {
-                Toast.makeText(context, "Your link info " + link.toString(),
-                        Toast.LENGTH_LONG).show();
+                if (link != null) {
+                    Toast.makeText(context, "Your link info " + link.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
 

@@ -39,12 +39,36 @@ public class KAuth {
         sharedAuth = auth;
     }
 
+    /**
+     * Starts the authentication process by launching an activity view.  This is for
+     * backwards compatibility for a default url; however, you can pass in a custom URL.
+     *
+     * @param context
+     */
     public void startAuthentication(Context context) {
-
-        // TODO: add check
         String url = String.format("%s://%s/services/?app_id=%s&referrer=mobile&retrieve_account_key=true",
                 kProtocolHTTPS, kAPIHost, appId);
+        startAuthentication(context, url);
+    }
 
+    /**
+     * Starts the authentication process by launch an activity view.
+     *
+     * // default
+     * url = "https://api.kloudless.com/services/?app_id=%s&referrer=mobile&retrieve_account_key=true"
+     *
+     * Authenticate a set of services:
+     * url = "https://api.kloudless.com/services/?app_id=%s&referrer=mobile&retrieve_account_key=true&services=box,dropbox"
+     *
+     * Skip the user selecting and authenticate a specific service:
+     * url = "https://api.kloudless.com/services/dropbox?app_id=%@&referrer=mobile&retrieve_account_key=true"
+     *
+     * Note: Both retrieve_account_key and mobile need to be set to true and mobile respectively to retrieve authentication credentials.
+     *
+     * @param context
+     * @param url - The URL can be customized for various stages of the authentication process
+     */
+    public void startAuthentication(Context context, String url) {
         // Start Kloudless auth activity.
         Intent intent = new Intent(context, AuthActivity.class);
         intent.putExtra(AuthActivity.URL, url);
