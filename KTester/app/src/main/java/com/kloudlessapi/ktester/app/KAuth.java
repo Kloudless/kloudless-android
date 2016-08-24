@@ -46,8 +46,8 @@ public class KAuth {
      * @param context
      */
     public void startAuthentication(Context context) {
-        String url = String.format("%s://%s/services/?app_id=%s&referrer=mobile&retrieve_account_key=true",
-                kProtocolHTTPS, kAPIHost, appId);
+        String url = String.format("%s://%s/v%s/oauth/?client_id=%s&referrer=mobile&retrieve_account_key=true",
+                kProtocolHTTPS, kAPIHost, kAPIVersion, appId);
         startAuthentication(context, url);
     }
 
@@ -94,7 +94,7 @@ public class KAuth {
         }
 
         String account = data.getStringExtra(AuthActivity.ACCOUNT);
-        String accountKey = data.getStringExtra(AuthActivity.ACCOUNT_KEY);
+        String accountKey = data.getStringExtra(AuthActivity.TOKEN);
 
         if (account != null && !account.equals("") &&
                 accountKey != null && !accountKey.equals("")) {
@@ -128,7 +128,7 @@ public class KAuth {
                     "Missing account.");
         }
 
-        String accountKey = data.getStringExtra(AuthActivity.ACCOUNT_KEY);
+        String accountKey = data.getStringExtra(AuthActivity.TOKEN);
         if (accountKey == null || accountKey.length() == 0) {
             throw new IllegalArgumentException("Invalid result intent passed in. " +
                     "Missing accountKey.");

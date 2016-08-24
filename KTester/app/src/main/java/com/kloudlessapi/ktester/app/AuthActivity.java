@@ -48,9 +48,9 @@ public class AuthActivity extends Activity {
 
     public static final String ACCOUNT = "ACCOUNT";
 
-    public static final String ACCOUNT_KEY = "ACCOUNT_KEY";
+    public static final String TOKEN = "TOKEN";
 
-    private static final String DEFAULT_WEB_HOST = "api.kloudless.com";
+    private static final String DEFAULT_WEB_HOST = "https://api.kloudless.com";
 
     /**
      * Provider of the local security needs of an AuthActivity.
@@ -227,7 +227,7 @@ public class AuthActivity extends Activity {
                 super.onPageFinished(view, url);
 
                 myWebView.loadUrl("javascript:window.AUTH.getAccount(document.getElementById('account').title);" +
-                        "window.AUTH.getAccountKey(document.getElementById('account_key').title);");
+                        "window.AUTH.getToken(document.getElementById('account_key').title);");
             };
         });
         myWebView.loadUrl(url);
@@ -236,7 +236,7 @@ public class AuthActivity extends Activity {
     public class WebAppInterface {
         Context mContext;
         private String account;
-        private String accountKey;
+        private String token;
 
         /** Instantiate the interface and set the context */
         WebAppInterface(Context c) {
@@ -250,14 +250,14 @@ public class AuthActivity extends Activity {
         }
 
         @JavascriptInterface
-        public void getAccountKey(String accountKey) {
-            Log.i("getAccountKey", accountKey);
-            this.accountKey = accountKey;
+        public void getToken(String bearerToken) {
+            Log.i("getToken", bearerToken);
+            this.token = bearerToken;
 
-            if (this.account != null && this.accountKey != null) {
+            if (this.account != null && this.token != null) {
                 result = new Intent();
                 result.putExtra(ACCOUNT, this.account);
-                result.putExtra(ACCOUNT_KEY, this.accountKey);
+                result.putExtra(TOKEN, this.token);
                 finish();
             }
         }
