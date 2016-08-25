@@ -90,6 +90,8 @@
     <orderEntry type="library" exported="" name="gson-2.2.4" level="project" />
     <orderEntry type="library" exported="" name="kloudless-java-0.1.4" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.1.0" level="project" />
+    <orderEntry type="library" exported="" name="kloudless-java-0.1.6" level="project" />
+    <orderEntry type="library" exported="" name="kloudless-java-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-19.1.0" level="project" />
   </component>
 </module>

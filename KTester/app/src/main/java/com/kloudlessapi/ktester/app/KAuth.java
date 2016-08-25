@@ -4,7 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Created by timothytliu on 4/17/14.
@@ -46,8 +52,9 @@ public class KAuth {
      * @param context
      */
     public void startAuthentication(Context context) {
-        String url = String.format("%s://%s/v%s/oauth/?client_id=%s&referrer=mobile&retrieve_account_key=true",
-                kProtocolHTTPS, kAPIHost, kAPIVersion, appId);
+        String state = UUID.randomUUID().toString();
+        String url = String.format("%s://%s/v%s/oauth/?client_id=%s&response_type=token&retrieve_account_key=true&state=%s",
+                kProtocolHTTPS, kAPIHost, kAPIVersion, appId, state);
         startAuthentication(context, url);
     }
 
@@ -93,11 +100,8 @@ public class KAuth {
             return false;
         }
 
-        String account = data.getStringExtra(AuthActivity.ACCOUNT);
-        String accountKey = data.getStringExtra(AuthActivity.TOKEN);
-
-        if (account != null && !account.equals("") &&
-                accountKey != null && !accountKey.equals("")) {
+        String token = data.getStringExtra(AuthActivity.TOKEN);
+        if (token != null && !token.equals("")) {
             return true;
         }
 
@@ -115,26 +119,26 @@ public class KAuth {
      * @throws IllegalStateException if authentication was not successful prior
      *         to this call (check with {@link #authenticationSuccessful()}.
      */
-    public String finishAuthentication() throws IllegalStateException {
+    public String finishAuthentication() throws IllegalStateException, IOException {
         Intent data = AuthActivity.result;
 
         if (data == null) {
             throw new IllegalStateException();
         }
 
+        String token = data.getStringExtra(AuthActivity.TOKEN);
         String account = data.getStringExtra(AuthActivity.ACCOUNT);
+        if (token == null || token.length() == 0) {
+            throw new IllegalArgumentException("Invalid result intent passed in. " +
+                    "Missing token.");
+        }
+
         if (account == null || account.length() == 0) {
             throw new IllegalArgumentException("Invalid result intent passed in. " +
                     "Missing account.");
         }
 
-        String accountKey = data.getStringExtra(AuthActivity.TOKEN);
-        if (accountKey == null || accountKey.length() == 0) {
-            throw new IllegalArgumentException("Invalid result intent passed in. " +
-                    "Missing accountKey.");
-        }
-
-        keysStore.put(account, accountKey);
+        keysStore.put(account, token);
 
         return account;
     }

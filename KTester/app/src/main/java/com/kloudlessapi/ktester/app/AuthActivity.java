@@ -1,6 +1,11 @@
 package com.kloudlessapi.ktester.app;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -30,6 +35,9 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.kloudless.Kloudless;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This activity is used internally for authentication, but must be exposed both
@@ -226,8 +234,7 @@ public class AuthActivity extends Activity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
-                myWebView.loadUrl("javascript:window.AUTH.getAccount(document.getElementById('account').title);" +
-                        "window.AUTH.getToken(document.getElementById('account_key').title);");
+                myWebView.loadUrl("javascript:window.AUTH.getToken(document.getElementById('access_token').getAttribute('data-value'));");
             };
         });
         myWebView.loadUrl(url);
@@ -244,15 +251,33 @@ public class AuthActivity extends Activity {
         }
 
         @JavascriptInterface
-        public void getAccount(String account) {
-            Log.i("getAccount", account);
-            this.account = account;
-        }
-
-        @JavascriptInterface
-        public void getToken(String bearerToken) {
+        public void getToken(String bearerToken) throws IOException, JSONException {
             Log.i("getToken", bearerToken);
             this.token = bearerToken;
+
+            KAuth tmp = new KAuth("");
+
+            // Verify the token and retrieve the account id
+            String url = String.format("%s://%s/v%s/oauth/token",
+                    tmp.kProtocolHTTPS, tmp.kAPIHost, tmp.kAPIVersion);
+            java.net.URL obj = new URL(url);
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) obj.openConnection();
+            String authorization = String.format("Bearer %s", token);
+            conn.setRequestProperty("Authorization", authorization);
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            String responseString = response.toString();
+            System.out.println(responseString);
+            JSONObject responseJson = new JSONObject(responseString);
+            this.account = responseJson.getString("account_id");
 
             if (this.account != null && this.token != null) {
                 result = new Intent();
