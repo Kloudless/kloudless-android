@@ -53,7 +53,7 @@ public class KAuth {
      */
     public void startAuthentication(Context context) {
         String state = UUID.randomUUID().toString();
-        String url = String.format("%s://%s/v%s/oauth/?client_id=%s&response_type=token&retrieve_account_key=true&state=%s",
+        String url = String.format("%s://%s/v%s/oauth/?client_id=%s&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=token&state=%s",
                 kProtocolHTTPS, kAPIHost, kAPIVersion, appId, state);
         startAuthentication(context, url);
     }
