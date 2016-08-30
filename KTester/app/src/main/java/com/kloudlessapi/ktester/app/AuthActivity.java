@@ -1,6 +1,11 @@
 package com.kloudlessapi.ktester.app;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -31,6 +36,9 @@ import android.widget.Toast;
 
 import com.kloudless.Kloudless;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * This activity is used internally for authentication, but must be exposed both
  * so that Android can launch it and for backwards compatibility.
@@ -48,9 +56,9 @@ public class AuthActivity extends Activity {
 
     public static final String ACCOUNT = "ACCOUNT";
 
-    public static final String ACCOUNT_KEY = "ACCOUNT_KEY";
+    public static final String TOKEN = "TOKEN";
 
-    private static final String DEFAULT_WEB_HOST = "api.kloudless.com";
+    private static final String DEFAULT_WEB_HOST = "https://api.kloudless.com";
 
     /**
      * Provider of the local security needs of an AuthActivity.
@@ -226,8 +234,7 @@ public class AuthActivity extends Activity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
-                myWebView.loadUrl("javascript:window.AUTH.getAccount(document.getElementById('account').title);" +
-                        "window.AUTH.getAccountKey(document.getElementById('account_key').title);");
+                myWebView.loadUrl("javascript:window.AUTH.getToken(document.getElementById('access_token').getAttribute('data-value'));");
             };
         });
         myWebView.loadUrl(url);
@@ -236,7 +243,7 @@ public class AuthActivity extends Activity {
     public class WebAppInterface {
         Context mContext;
         private String account;
-        private String accountKey;
+        private String token;
 
         /** Instantiate the interface and set the context */
         WebAppInterface(Context c) {
@@ -244,20 +251,38 @@ public class AuthActivity extends Activity {
         }
 
         @JavascriptInterface
-        public void getAccount(String account) {
-            Log.i("getAccount", account);
-            this.account = account;
-        }
+        public void getToken(String bearerToken) throws IOException, JSONException {
+            Log.i("getToken", bearerToken);
+            this.token = bearerToken;
 
-        @JavascriptInterface
-        public void getAccountKey(String accountKey) {
-            Log.i("getAccountKey", accountKey);
-            this.accountKey = accountKey;
+            KAuth tmp = new KAuth("");
 
-            if (this.account != null && this.accountKey != null) {
+            // Verify the token and retrieve the account id
+            String url = String.format("%s://%s/v%s/oauth/token",
+                    tmp.kProtocolHTTPS, tmp.kAPIHost, tmp.kAPIVersion);
+            java.net.URL obj = new URL(url);
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) obj.openConnection();
+            String authorization = String.format("Bearer %s", token);
+            conn.setRequestProperty("Authorization", authorization);
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            String responseString = response.toString();
+            System.out.println(responseString);
+            JSONObject responseJson = new JSONObject(responseString);
+            this.account = responseJson.getString("account_id");
+
+            if (this.account != null && this.token != null) {
                 result = new Intent();
                 result.putExtra(ACCOUNT, this.account);
-                result.putExtra(ACCOUNT_KEY, this.accountKey);
+                result.putExtra(TOKEN, this.token);
                 finish();
             }
         }

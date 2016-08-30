@@ -83,12 +83,14 @@ public class MainActivity extends ActionBarActivity {
                 String accountId = auth.finishAuthentication();
                 showToast("Added account: " + accountId);
 
-                // initialize Kloudless API, can switch accountId + accountKey later
-                String accountKey = (String) KAuth.keysStore.get(accountId);
+                // initialize Kloudless API, can switch accountId + bearerToken later
+                String token = (String) KAuth.keysStore.get(accountId);
                 Kloudless.accountId = accountId;
-                Kloudless.accountKey = accountKey;
+                Kloudless.bearerToken = token;
             } catch (IllegalStateException e) {
                 Log.i("Kloudless", "Couldn't authenticate with Kloudless:" + e.getLocalizedMessage());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
