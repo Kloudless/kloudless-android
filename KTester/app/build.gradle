@@ -1,28 +1,48 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
-
+    compileSdkVersion 23
+    buildToolsVersion '25.0.0'
     defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 19
+        applicationId "com.kloudless.ktester"
+        minSdkVersion 15
+        multiDexEnabled true
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        jackOptions {
+            enabled true
+        }
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildTypes {
         release {
-            apply plugin: 'maven'
-            apply plugin: 'eclipse'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
     }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:19.+'
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile files('libs/gson-2.2.4.jar')
-    compile files('libs/kloudless-java-0.1.4.jar')
-    compile files('libs/kloudless-java-0.1.6.jar')
-    compile files('libs/kloudless-java-1.0.0.jar')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:23.2.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.android.support:customtabs:23.2.0'
+    // insert kloudless java sdk here from maven
+    compile 'com.kloudless:kloudless-java:1.0.3'
+    testCompile 'junit:junit:4.12'
 }
+

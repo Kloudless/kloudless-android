@@ -1,15 +1,19 @@
-package com.kloudlessapi.ktester.app;
+package com.kloudless.ktester;
 
 import android.content.Context;
-import android.support.v7.app.ActionBarActivity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.kloudless.Kloudless;
 import com.kloudless.exception.KloudlessException;
 import com.kloudless.model.Account;
@@ -21,120 +25,109 @@ import com.kloudless.model.LinkCollection;
 import com.kloudless.model.MetadataCollection;
 import com.kloudless.net.KloudlessResponse;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
-import android.os.AsyncTask;
-
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
     static Gson GSON = new GsonBuilder().create();
 
-    private boolean mLoggedIn;
     // If you want to test, please use your own folder and file ids.
-    public String folderId = "fL2E=";
+    public String packageName = BuildConfig.APPLICATION_ID;
+    public String packageSuffix = packageName.substring(packageName.lastIndexOf(".") + 1);
+    public String redirect_uri = String.format("%s://kloudless/callback", packageSuffix);
+    public String clientId = "Am3oC0zHwvFc5zPNZk7lku98jGlhRWbjSiAnsc7pUYApaaU3";
+    public String folderId = "root";
     public String fileId = "fL3N1cHBvcnQtc2FsZXNmb3JjZS5wbmc=";
     public String linkId = "iywSjUZMos2_M_HTHpJU";
-
-    // Android widgets
-    private Button mSubmit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String appId = "INSERT YOUR APP ID HERE";
-        KAuth auth = new KAuth(appId);
-        KAuth.setSharedAuth(auth);
+        // Create the UI
+        final Button button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(v -> {
+            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+            CustomTabsIntent customTabsIntent = builder.build();
 
-        mSubmit = (Button)findViewById(R.id.auth_button);
-
-        mSubmit.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // This logs you out if you're logged in, or vice versa
-                if (mLoggedIn) {
-                    logOut();
-                } else {
-                    KAuth.getSharedAuth().startAuthentication(MainActivity.this);
-                }
-            }
+            // Code here executes on main thread after user presses button
+            String urlString = String.format("%s/v%s/oauth/?client_id=%s&redirect_uri=%s&response_type=token&state=12345",
+                Kloudless.BASE_URL, Kloudless.apiVersion, clientId, redirect_uri);
+            Uri url = Uri.parse(urlString);
+            customTabsIntent.launchUrl(MainActivity.this, url);
         });
+
+        // Capture Intent
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String link = intent.getDataString();
+
+        if (Intent.ACTION_VIEW.equals(action)) {
+            Uri url = Uri.parse(link);
+            String fragment = url.getFragment();
+            HashMap<String, String> data = new HashMap<>();
+            for (String frag : fragment.split("&")) {
+                String[] map = frag.split("=");
+                data.put(map[0], map[1]);
+            }
+
+            Kloudless.bearerToken = data.get("access_token");
+            verifyToken(Kloudless.bearerToken);
+        }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        KAuth auth = KAuth.getSharedAuth();
+    public void verifyToken(String bearerToken) {
+        class TokenTask extends AsyncTask {
+            private Context context;
 
-        // The next part must be inserted in the onResume() method of the
-        // activity from which session.startAuthentication() was called, so
-        // that Kloudless authentication completes properly.
-        if (auth.authenticationSuccessful()) {
-            try {
-                // Mandatory call to complete the auth
-                String accountId = auth.finishAuthentication();
-                showToast("Added account: " + accountId);
+            private TokenTask(Context ctx) {
+                this.context = ctx;
+            }
 
-                // initialize Kloudless API, can switch accountId + bearerToken later
-                String token = (String) KAuth.keysStore.get(accountId);
-                Kloudless.accountId = accountId;
-                Kloudless.bearerToken = token;
-            } catch (IllegalStateException e) {
-                Log.i("Kloudless", "Couldn't authenticate with Kloudless:" + e.getLocalizedMessage());
-            } catch (IOException e) {
-                e.printStackTrace();
+            @Override
+            protected Object doInBackground(Object... arg0) {
+
+                try {
+                    String tokenUrl = String.format("%s/v%s/oauth/token", Kloudless.BASE_URL, Kloudless.apiVersion);
+
+                    java.net.URL obj = new URL(tokenUrl);
+                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) obj.openConnection();
+                    String authorization = String.format("Bearer %s", bearerToken);
+                    conn.setRequestProperty("Authorization", authorization);
+
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    StringBuffer response = new StringBuffer();
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    String responseString = response.toString();
+                    JSONObject responseJson = new JSONObject(responseString);
+                    Kloudless.accountId = responseJson.getString("account_id");
+
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+                return Kloudless.accountId;
             }
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void logOut() {
-        // Change UI state to display logged out version
-        setLoggedIn(false);
-    }
-
-    /**
-     * Convenience function to change UI state based on being logged in
-     */
-    private void setLoggedIn(boolean loggedIn) {
-        mLoggedIn = loggedIn;
-        if (loggedIn) {
-            mSubmit.setText("Unlink from Kloudless");
-        } else {
-            mSubmit.setText("Link with Kloudless");
-        }
-    }
-
-    private void showToast(String msg) {
-        Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
-        error.show();
+        new TokenTask(this).execute();
     }
 
     /**
@@ -147,7 +140,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private AccountCollection accounts;
 
-            public AccountTask(Context ctx) {
+            private AccountTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -180,7 +173,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private Account account;
 
-            public AccountTask(Context ctx) {
+            private AccountTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -218,7 +211,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private MetadataCollection contents;
 
-            public FolderTask(Context ctx) {
+            private FolderTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -226,6 +219,7 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
+                    System.out.println(String.format("Bearer Token: %s", Kloudless.bearerToken));
                     contents = Folder.contents("root", Kloudless.accountId, null);
                     Log.i("getFolderContents", contents.toString());
                 } catch (KloudlessException e) {
@@ -251,7 +245,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private Folder folder;
 
-            public FolderTask(Context ctx) {
+            private FolderTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -284,7 +278,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private Folder folder;
 
-            public FolderTask(Context ctx) {
+            private FolderTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -319,7 +313,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private Folder folder;
 
-            public FolderTask(Context ctx) {
+            private FolderTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -330,7 +324,7 @@ public class MainActivity extends ActionBarActivity {
                     HashMap<String, Object> params = new HashMap<String, Object>();
                     params.put("name", "new new folder");
                     params.put("parent_id", "root");
-                    Folder folder = Folder.create(Kloudless.accountId, params);
+                    folder = Folder.create(Kloudless.accountId, params);
                     Log.i("createFolder", folder.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -361,7 +355,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private String contents;
 
-            public FileTask(Context ctx) {
+            private FileTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -395,7 +389,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private File file;
 
-            public FileTask(Context ctx) {
+            private FileTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -428,7 +422,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private File file;
 
-            public FileTask(Context ctx) {
+            private FileTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -436,9 +430,9 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
-                    HashMap<String, Object> params = new HashMap<String, Object>();
+                    HashMap<String, Object> params = new HashMap<>();
                     params.put("name", "test (16).txt");
-                    File file = File.save(fileId, Kloudless.accountId, params);
+                    file = File.save(fileId, Kloudless.accountId, params);
                     Log.i("getFileInfo", file.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -463,7 +457,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private File file;
 
-            public FileTask(Context ctx) {
+            private FileTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -490,13 +484,11 @@ public class MainActivity extends ActionBarActivity {
 
                     System.out.println(params);
 
-                    File file = File.create(Kloudless.accountId, params);
+                    file = File.create(Kloudless.accountId, params);
                     Log.i("getFileInfo", file.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedEncodingException e) {
+                } catch (FileNotFoundException | UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
                 return null;
@@ -524,7 +516,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private LinkCollection links;
 
-            public LinkTask(Context ctx) {
+            private LinkTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -557,7 +549,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private Link link;
 
-            public LinkTask(Context ctx) {
+            private LinkTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -590,7 +582,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private Link link;
 
-            public LinkTask(Context ctx) {
+            private LinkTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -598,9 +590,9 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
-                    HashMap<String, Object> params = new HashMap<String, Object>();
+                    HashMap<String, Object> params = new HashMap<>();
                     params.put("active", false);
-                    Link link = Link.save(linkId, Kloudless.accountId, params);
+                    link = Link.save(linkId, Kloudless.accountId, params);
                     Log.i("getLinkInfo", link.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -625,7 +617,7 @@ public class MainActivity extends ActionBarActivity {
             private Context context;
             private Link link;
 
-            public LinkTask(Context ctx) {
+            private LinkTask(Context ctx) {
                 this.context = ctx;
             }
 
@@ -633,9 +625,9 @@ public class MainActivity extends ActionBarActivity {
             protected Object doInBackground(Object... arg0) {
 
                 try {
-                    HashMap<String, Object> params = new HashMap<String, Object>();
+                    HashMap<String, Object> params = new HashMap<>();
                     params.put("file_id", fileId);
-                    Link link = Link.create(Kloudless.accountId, params);
+                    link = Link.create(Kloudless.accountId, params);
                     Log.i("getLinkInfo", link.toString());
                 } catch (KloudlessException e) {
                     Log.e("error", e.getMessage());
@@ -658,5 +650,4 @@ public class MainActivity extends ActionBarActivity {
     public void deleteLink(View view) throws KloudlessException {
         // TODO: very simple, follow other file methods, but use delete
     }
-
 }
