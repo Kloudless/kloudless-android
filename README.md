@@ -20,22 +20,35 @@ Note: The SDK is designed to work with Java 1.8 or above.
 3. Build and Run the MainActivity.java
 4. Once running, you can test the functionalities of the API without errors.
 
-## Authorizing Users without the example app
+## Authorizing users with your own Android app
+
+Copy this code from the example app from lines 46 through 131 into your
+application to mirror how this example app authorizes users:
+https://github.com/Kloudless/kloudless-android/blob/master/KTester/app/src/main/java/com/kloudless/ktester/MainActivity.java#L46
+
+You can add the code to your own activity rather than the `onCreate` of
+a separate activity. 
+
+Then, make the following changes:
 
 1. The example app uses android.support.customtabs.CustomTabsIntent to handle
-the OAuth 2.0 flow to Kloudless and stores the access token and account id at
+the OAuth 2.0 flow to Kloudless and stores the access token and account ID at
 Kloudless.bearerToken and Kloudless.accountId.
-2. To authorize users without the example app, first register a Redirect URI
+2. To authorize users from your own app, first register a Redirect URI
 scheme in the Kloudless developer portal `App Details` page (e.g. 
-ktester://kloudless/callback).
+ktester://kloudless/callback), replacing `ktester` with your app's package suffix
+as shown [here](https://github.com/Kloudless/kloudless-android/blob/master/KTester/app/src/main/java/com/kloudless/ktester/MainActivity.java#L49),
+or any other scheme.
 3. Add an Intent Filter to the AndroidManifest.xml that matches the Redirect
-URI scheme (e.g. `<data android:scheme="ktester" android:host="kloudless" />`)
-4. Modify the `redirect_uri` variable to match. (we use the package suffix)
-5. Initialize your own CustomTabsIntent Builder and launch the authorization
-url with your own button action.
-6. Make an API call to verify the access token returned by the Intent filter
-and retrieve the account ID.
-7. You can now successfully make requests to the Kloudless API with the bearer
+URI scheme, similar to the one the example app sets up
+[here](https://github.com/Kloudless/kloudless-android/blob/master/KTester/app/src/main/AndroidManifest.xml#L20).
+4. Initialize your own CustomTabsIntent Builder and launch the authorization
+URL with your own button action, as shown in the example code in
+[MainActivity](https://github.com/Kloudless/kloudless-android/blob/master/KTester/app/src/main/java/com/kloudless/ktester/MainActivity.java#L70).
+5. Once your app retrieves the token, make an API call to verify it
+and retrieve the account ID as shown in the
+[example app](https://github.com/Kloudless/kloudless-android/blob/master/KTester/app/src/main/java/com/kloudless/ktester/MainActivity.java#L92).
+6. You can now successfully make requests to the Kloudless API with the bearer
 token and account ID.
 
 Note: You will need to add `com.android.support:customtabs:23.2.0` to your
@@ -66,18 +79,5 @@ Step 2. Click the additional buttons to test Kloudless API requests.
 To make your own requests with the Java SDK you will need to create an
 AsyncTask as seen in MainActivity.java.
 
-To authenticate with your own Application ID or Client ID please follow
-the steps in Authorizing Users without the example app.
-
-## UPDATES
-
-* 2017/07 - updated SDK to use CustomTabsIntent removed AuthActivity
-* 2016/08 - updated SDK to Kloudless v1
-* 2014/10 - updated SDK with new methods, modified AuthActivity
-* 2014/04 - added initial Example project
-
-## TODO
-
-* more tests
-* add multiple account id / access token management
-* add additional examples
+To authenticate with your own Application ID or Client ID, please follow
+the steps above.
