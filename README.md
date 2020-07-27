@@ -7,7 +7,7 @@ Android SDK for the [Kloudless API](https://developers.kloudless.com)
 
 Requirements:
 
-1. AndroidStudio 2.3.3 or equivalent
+1. AndroidStudio 4.0.1 or equivalent
 2. You need to have registered as a Kloudless app at
    https://developers.kloudless.com. You should have an App key and API Key.
 
@@ -51,14 +51,14 @@ and retrieve the account ID as shown in the
 6. You can now successfully make requests to the Kloudless API with the bearer
 token and account ID.
 
-Note: You will need to add `com.android.support:customtabs:23.2.0` to your
+Note: You will need to add `androidx.browser:browser:1.2.0` to your
 module's build.gradle file and add the `android.permission.INTERNET` to your
 `AndroidManifest.xml` file.
 
 ## Adding the Kloudless Java SDK to an Android Application (using maven).
 
 1. Verify that Maven is a valid repository in your Project's build.gradle
-2. Add `com.kloudless:kloudless-java:1.0.3` to your module's build.gradle file.
+2. Add `com.kloudless:kloudless-java:1.0.4` to your module's build.gradle file.
 3. Under `compileOptions` verify `sourceCompatibility` and `targetCompatibility`
 as `JavaVersion.VERSION_1_8`.
 4. Under `packagingOptions` exclude `META-INF/LICENSE`
